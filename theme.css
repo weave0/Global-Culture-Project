@@ -1,0 +1,29 @@
+/* theme.css - Externalized CSS for branding and reusability */
+body {
+    background: linear-gradient(180deg, #011627 0%, #001F3F 100%);
+    color: #e0f7fa;
+    font-family: 'Unbounded', sans-serif;
+}
+h1, h2, h3 {
+    text-shadow: 0 0 5px rgba(255,255,255,0.2);
+}
+[data-testid="stAppViewContainer"] {
+    background-color: transparent;
+}
+.star {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    animation: float 6s ease-in-out infinite;
+    pointer-events: none;
+}
+@keyframes float {
+    0%   { transform: translateY(0);   opacity: 0.4; }
+    50%  { transform: translateY(-15px); opacity: 0.8; }
+    100% { transform: translateY(0);   opacity: 0.4; }
+}
+.star:nth-child(1) { top: 20%; left: 10%; animation-delay: 0s; }
+.star:nth-child(2) { top: 50%; left: 40%; animation-delay: 1s; }
+.star:nth-child(3) { top: 70%; left: 70%; animation-delay: 2s; }

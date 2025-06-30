@@ -1,2 +1,38 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+*.py text eol=lf
+*.csv text eol=lf
+*.md text eol=lf
+
+# Ensure all text files use LF line endings in the repo
+* text=auto eol=lf
+
+# Treat CSV, Excel, and other data as text
+*.csv     text
+*.tsv     text
+*.txt     text
+*.md      text
+*.json    text
+*.xml     text
+
+# Treat source files as text
+*.py      text
+*.js      text
+*.ts      text
+*.html    text
+*.css     text
+*.yml     text
+*.yaml    text
+
+# Treat Office documents as binary to avoid diffs
+*.xlsx    binary
+*.xlsm    binary
+*.docx    binary
+*.pptx    binary
+*.pdf     binary
+
+# Normalize shell scripts and config files
+*.sh      text eol=lf
+*.env     text eol=lf
+*.gitattributes text eol=lf
+*.editorconfig text eol=lf

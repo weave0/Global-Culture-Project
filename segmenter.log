@@ -1,0 +1,3 @@
+2025-06-30 02:20:42,234 INFO Processing input_docs\PGLS Global Culture Guide v1bw62726.docx with GPT=True, section_summaries=True
+2025-06-30 02:20:42,521 INFO Segmented 76 segments from input_docs\PGLS Global Culture Guide v1bw62726.docx
+2025-06-30T02:20:42.798717 | File: PGLS Global Culture Guide v1bw62726.docx | Segments: 76 | GPT: True

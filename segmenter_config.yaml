@@ -1,0 +1,9 @@
+# segmenter_config.yaml - Persistent settings for runtime use
+# Example configuration for the Global Culture Project pipeline
+
+default_output_dir: outputs_ui
+repo_csv: Global_Culture_Repository_Output.csv
+gpt_enrichment: true
+min_content_length: 100
+ambient_sound: true
+theme: ocean

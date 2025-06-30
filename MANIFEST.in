@@ -1,0 +1,3 @@
+include known_cultures.txt
+include enrichment_rules.json
+recursive-include data *

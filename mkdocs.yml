@@ -1,0 +1,18 @@
+site_name: Global Culture Guide
+repo_url: https://github.com/your-org/Global-Culture-Project
+repo_name: Global Culture Project
+docs_dir: outputs/markdown
+nav:
+  - Home: index.md
+  # Add more navigation as needed
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: blue
+      accent: teal
+markdown_extensions:
+  - admonition
+  - codehilite
+  - toc:
+      permalink: true

@@ -1,0 +1,4 @@
+# Ruff configuration for linting and formatting
+line-length = 100
+select = ["E", "F", "W", "I", "UP", "B", "C90", "N", "D", "ANN", "S", "A", "C4", "DTZ", "EM", "EXE", "FA", "ISC", "ICN", "PIE", "PT", "Q", "RET", "SIM", "T20", "TID", "TCH", "ARG", "PTH", "ERA", "PL", "RUF"]
+ignore = []

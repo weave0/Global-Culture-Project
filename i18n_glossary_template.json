@@ -1,0 +1,35 @@
+{
+  "en": {
+    "Orientation": "Orientation",
+    "Economy": "Economy",
+    "Marriage and Family": "Marriage and Family",
+    "Religion and Expressive Culture": "Religion and Expressive Culture",
+    "Kinship": "Kinship",
+    "Political Organization": "Political Organization",
+    "Socialization": "Socialization",
+    "Health": "Health",
+    "Death and Afterlife": "Death and Afterlife"
+  },
+  "es": {
+    "Orientation": "Orientación",
+    "Economy": "Economía",
+    "Marriage and Family": "Matrimonio y Familia",
+    "Religion and Expressive Culture": "Religión y Cultura Expresiva",
+    "Kinship": "Parentesco",
+    "Political Organization": "Organización Política",
+    "Socialization": "Socialización",
+    "Health": "Salud",
+    "Death and Afterlife": "Muerte y Más Allá"
+  },
+  "fr": {
+    "Orientation": "Orientation",
+    "Economy": "Économie",
+    "Marriage and Family": "Mariage et Famille",
+    "Religion and Expressive Culture": "Religion et Culture Expressive",
+    "Kinship": "Parenté",
+    "Political Organization": "Organisation Politique",
+    "Socialization": "Socialisation",
+    "Health": "Santé",
+    "Death and Afterlife": "Mort et Au-delà"
+  }
+}
