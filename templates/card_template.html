@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ culture_name }} - Culture Card</title>
+  <meta name="description" content="Cultural profile for {{ culture_name }}{% if entry.get('region') %} ({{ entry.get('region') }}){% endif %}">
+  <meta property="og:title" content="{{ culture_name }} - Culture Card">
+  <meta property="og:description" content="Cultural profile for {{ culture_name }}{% if entry.get('region') %} ({{ entry.get('region') }}){% endif %}">
+  <meta property="og:type" content="article">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="{{ culture_name }} - Culture Card">
+  <meta name="twitter:description" content="Cultural profile for {{ culture_name }}{% if entry.get('region') %} ({{ entry.get('region') }}){% endif %}">
+  <style>
+    body {
+      background: url('https://www.toptal.com/designers/subtlepatterns/patterns/symphony.png');
+    }
+    .sp-card {
+      border: 1px solid #ccc;
+      padding: 16px;
+      margin: 12px;
+      border-radius: 8px;
+      max-width: 600px;
+      font-family: Arial, sans-serif;
+      background: #fff;
+    }
+    .sp-card h2 { margin-top: 0; }
+    .sp-card div { margin-bottom: 10px; }
+    .toc {
+      position: sticky;
+      top: 0;
+      background: #f9f9f9;
+      padding: 10px 16px;
+      border-bottom: 1px solid #ddd;
+      z-index: 10;
+      max-width: 600px;
+    }
+    .toc ul { margin: 0; padding-left: 20px; }
+    .toc li { margin-bottom: 4px; }
+    .missing-fields {
+      background: #fffbe6;
+      border: 1px solid #ffe58f;
+      color: #ad8b00;
+      padding: 10px 16px;
+      margin: 12px 0;
+      border-radius: 6px;
+      font-size: 0.95em;
+    }
+    .search-bar {
+      margin: 12px 0;
+      display: flex;
+      justify-content: center;
+    }
+    .search-bar input[type="text"] {
+      width: 90%;
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: 1px solid #bbb;
+      font-size: 1em;
+    }
+    .version-stamp {
+      font-size: 0.85em;
+      color: #888;
+      text-align: right;
+      margin-bottom: 8px;
+    }
+    @media print {
+      body, .sp-card { background: #fff !important; color: #000 !important; }
+      .toc, .search-bar, .version-stamp { display: none !important; }
+      .sp-card { border: none !important; box-shadow: none !important; }
+      a { color: #000 !important; text-decoration: none !important; }
+    }
+  </style>
+  <script>
+    // Simple search/filter for fields
+    function filterFields() {
+      var input = document.getElementById('fieldSearch');
+      var filter = input.value.toLowerCase();
+      var fields = document.querySelectorAll('.sp-card .field-block');
+      fields.forEach(function(div) {
+        if (div.textContent.toLowerCase().indexOf(filter) > -1) {
+          div.style.display = '';
+        } else {
+          div.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</head>
+<body>
+{% set fallback_flag = "🌐" %}
+{% set show_flag = flag if flag else fallback_flag %}
+{% set edit_link = entry.get('source_docx') or "" %}
+{% set version_stamp = generated_on if generated_on else "" %}
+
+{# --- Missing Field Summary --- #}
+{% set missing_fields = [] %}
+{% for group, fields in sections.items() %}
+  {% for field in fields %}
+    {% if not entry.get(field) %}
+      {% set _ = missing_fields.append(labels.get(field, field.replace('_',' ').title())) %}
+    {% endif %}
+  {% endfor %}
+{% endfor %}
+{% if missing_fields %}
+  <div class="missing-fields" role="alert" aria-live="polite">
+    <strong>Missing fields:</strong> {{ missing_fields|join(', ') }}
+  </div>
+{% endif %}
+
+<div class="toc" role="navigation" aria-label="Table of Contents">
+  <strong>Contents:</strong>
+  <ul>
+    {% for group, fields in sections.items() %}
+      <li><a href="#{{ group|lower|replace(' ','_')|replace('&','')|replace('__','_') }}">{{ group }}</a></li>
+    {% endfor %}
+  </ul>
+</div>
+
+<div class="search-bar">
+  <input type="text" id="fieldSearch" placeholder="Search fields..." onkeyup="filterFields()" aria-label="Search fields">
+</div>
+
+<div class="version-stamp">
+  {% if version_stamp %}Generated on {{ version_stamp }}{% endif %}
+  {% if edit_link %}
+    | <a href="{{ edit_link }}" target="_blank" rel="noopener">Edit Source</a>
+  {% endif %}
+</div>
+
+<div class="sp-card" role="main" aria-label="Culture Card">
+  <h2 aria-label="Culture Name">
+    {{ show_flag }} {{ culture_name }}
+    {% if not flag and entry.get("region") %}<span style="font-size:0.7em;color:#888;">({{ entry.get("region") }})</span>{% endif %}
+  </h2>
+  {% set pusheen_path = "images/Pusheen and Busey.png" %}
+  <img src="{{ pusheen_path }}" alt="Pusheen and Busey" style="max-width:120px;display:block;margin:0 auto 12px auto;border-radius:12px;box-shadow:0 2px 8px #ccc;">
+  {% for group, fields in sections.items() %}
+    <h3 id="{{ group|lower|replace(' ','_')|replace('&','')|replace('__','_') }}">{{ group }}</h3>
+    {% for field in fields %}
+      {% if entry.get(field) %}
+        <div class="field-block">
+          <strong title="{{ field }}">{{ labels.get(field, field.replace('_', ' ').title()) }}:</strong>
+          {{ entry[field] }}
+        </div>
+      {% endif %}
+    {% endfor %}
+  {% endfor %}
+</div>
+</body>
+</html>

@@ -1,0 +1,143 @@
+import os
+import json
+import argparse
+import openai
+
+# Set your OpenAI API key
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+PROMPTS = {
+    "summary": "Provide a concise summary of the culture of {culture_name}.",
+    "greetings": "Describe common greetings in {culture_name}.",
+    "taboos": "What are common taboos in {culture_name}?",
+    "gestures": "Explain common gestures in {culture_name}.",
+    "religion": "Describe the main religious practices and beliefs in {culture_name}.",
+    "gender_roles": "Discuss traditional and modern gender roles in {culture_name}.",
+    "communication_style": "Describe the typical communication style in {culture_name} (e.g., direct/indirect, high/low context).",
+    "clothing": "Describe traditional and common modern clothing styles in {culture_name}.",
+    # Add other fields as needed
+}
+
+def load_culture_data(filepath):
+    if os.path.exists(filepath):
+        with open(filepath, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    return {}  # Return empty dict if file doesn't exist
+
+def save_culture_data(filepath, data):
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+def enrich_culture_with_ai(culture_name, existing_data, force_enrich=False):
+    print(f"Enriching {culture_name} with AI...")
+    enriched_data = existing_data.copy()
+
+    # Ensure 'culture_name' field is set
+    if 'culture_name' not in enriched_data or not enriched_data['culture_name']:
+        enriched_data['culture_name'] = culture_name
+
+    # Ensure 'language_tag' field is set, default to 'und' if not present
+    if 'language_tag' not in enriched_data or not enriched_data['language_tag']:
+        enriched_data['language_tag'] = "und"
+
+    for field, prompt_template in PROMPTS.items():
+        if force_enrich or (field not in enriched_data or not enriched_data[field]):
+            prompt = prompt_template.format(culture_name=culture_name)
+            response = openai.Completion.create(
+                engine="text-davinci-003",
+                prompt=prompt,
+                max_tokens=500
+            )
+            enriched_data[field] = response.choices[0].text.strip()
+            print(f"  - Enriched '{field}'")
+        else:
+            print(f"  - Skipping '{field}' (already has content)")
+
+    if 'source' not in enriched_data:
+        enriched_data['source'] = "AI Enrichment (OpenAI GPT)"
+
+    return enriched_data
+
+def main():
+    parser = argparse.ArgumentParser(description="AI-powered culture data enrichment script.")
+    parser.add_argument("--input", type=str, required=True,
+                        help="Path to the input folder containing .v3.json files.")
+    parser.add_argument("--output", type=str, required=True,
+                        help="Path to the output folder where enriched .v3.json files will be saved.")
+    parser.add_argument("--force", action="store_true",
+                        help="Force enrichment of all fields, even if they already have content.")
+    args = parser.parse_args()
+
+    input_folder = args.input
+    output_folder = args.output
+    force_enrich = args.force
+
+    os.makedirs(output_folder, exist_ok=True)
+
+    culture_files = [f for f in os.listdir(input_folder) if f.endswith(".v3.json")]
+
+    if not culture_files:
+        print(f"No .v3.json files found in input folder: {input_folder}")
+        print("Please run generate_culture_stubs.py first to create initial files.")
+        return
+    else:
+        print(f"Found {len(culture_files)} culture files in input folder: {input_folder}")
+        for filename in culture_files:
+            input_filepath = os.path.join(input_folder, filename)
+            existing_data = load_culture_data(input_filepath)
+
+            culture_name = existing_data.get('culture_name', filename.replace(".v3.json", ""))
+            language_tag = existing_data.get('language_tag', 'und')
+
+            enriched_data = enrich_culture_with_ai(culture_name, existing_data, force_enrich)
+
+            lang_output_folder = os.path.join(output_folder, language_tag)
+            output_filepath = os.path.join(lang_output_folder, filename)
+
+            save_culture_data(output_filepath, enriched_data)
+            print(f"Enriched and saved: {output_filepath}")
+
+if __name__ == "__main__":
+    main()
+[
+  {
+    "name": "Arabic (All Dialects)",
+    "alt_names": [
+      "Arabic"
+    ]
+  },
+  {
+    "name": "Albanian (Gheg & Tosk)",
+    "alt_names": [
+      "Albanian",
+      "Gheg",
+      "Tosk"
+    ]
+  },
+  {
+    "name": "Chinese (All Dialects, Simplified & Traditional)",
+    "alt_names": [
+      "Chinese",
+      "Simplified Chinese",
+      "Traditional Chinese"
+    ]
+  },
+  {
+    "name": "Portuguese (Continental, Brazilian & African)",
+    "alt_names": [
+      "Portuguese",
+      "Continental Portuguese",
+      "Brazilian Portuguese",
+      "African Portuguese"
+    ]
+  },
+  {
+    "name": "Spanish (Castilian & Latin American)",
+    "alt_names": [
+      "Spanish",
+      "Castilian Spanish",
+      "Latin American Spanish"
+    ]
+  }
+]

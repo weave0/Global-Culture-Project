@@ -1,0 +1,92 @@
+{
+  "spanish": {
+    "estimated_speakers": "485 million",
+    "primary_regions": [
+      "Spain",
+      "Mexico",
+      "Colombia",
+      "Argentina",
+      "Peru",
+      "United States"
+    ]
+  },
+  "french": {
+    "estimated_speakers": "77 million",
+    "primary_regions": [
+      "France",
+      "Canada",
+      "Belgium",
+      "Switzerland",
+      "Luxembourg",
+      "Monaco"
+    ]
+  },
+  "chinese": {
+    "estimated_speakers": "1.2 billion",
+    "primary_regions": [
+      "China",
+      "Taiwan",
+      "Singapore",
+      "Malaysia"
+    ]
+  },
+  "english": {
+    "estimated_speakers": "360 million",
+    "primary_regions": [
+      "United States",
+      "United Kingdom",
+      "Canada",
+      "Australia",
+      "New Zealand"
+    ]
+  },
+  "hindi": {
+    "estimated_speakers": "341 million",
+    "primary_regions": [
+      "India",
+      "Nepal"
+    ]
+  },
+  "arabic": {
+    "estimated_speakers": "310 million",
+    "primary_regions": [
+      "Egypt",
+      "Saudi Arabia",
+      "Iraq",
+      "Sudan",
+      "Algeria",
+      "Morocco"
+    ]
+  },
+  "bengali": {
+    "estimated_speakers": "230 million",
+    "primary_regions": [
+      "Bangladesh",
+      "India"
+    ]
+  },
+  "portuguese": {
+    "estimated_speakers": "220 million",
+    "primary_regions": [
+      "Brazil",
+      "Portugal",
+      "Angola",
+      "Mozambique"
+    ]
+  },
+  "russian": {
+    "estimated_speakers": "154 million",
+    "primary_regions": [
+      "Russia",
+      "Belarus",
+      "Kazakhstan",
+      "Kyrgyzstan"
+    ]
+  },
+  "japanese": {
+    "estimated_speakers": "128 million",
+    "primary_regions": [
+      "Japan"
+    ]
+  }
+}

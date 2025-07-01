@@ -1,0 +1,25 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Local development settings
+.env
+.DS_Store
+.idea/
+.vscode/
+
+# Export and temp files
+*.zip
+export.*
+batch_export_*.zip
+
+# Auto-generated outputs
+sharepoint_output/
+tmp_export/
+export.html
+export.md
+
+# System-specific or runtime DBs
+*.db

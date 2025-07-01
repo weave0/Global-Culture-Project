@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Global Culture Master Directory</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 1em;
+      background: #f8f8f8;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .search-bar, .view-toggle {
+      display: flex;
+      justify-content: center;
+      margin: 1em auto;
+      gap: 1em;
+    }
+
+    .search-bar input {
+      width: 300px;
+      padding: 8px;
+      font-size: 1em;
+      border-radius: 6px;
+      border: 1px solid #aaa;
+    }
+
+    .view-toggle button {
+      padding: 8px 16px;
+      font-size: 1em;
+      border-radius: 6px;
+      border: none;
+      background: #0066cc;
+      color: white;
+      cursor: pointer;
+    }
+
+    .view-toggle button:hover {
+      background: #005bb5;
+    }
+
+    .culture-list, .culture-grid {
+      display: none;
+      max-width: 1200px;
+      margin: auto;
+    }
+
+    .culture-list.active,
+    .culture-grid.active {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1em;
+    }
+
+    .culture-item {
+      background: white;
+      padding: 1em;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 350px;
+    }
+
+    .culture-grid .culture-item {
+      width: 30%;
+    }
+
+    .culture-item h2 {
+      margin-top: 0;
+      font-size: 1.25em;
+    }
+
+    .culture-item a {
+      display: inline-block;
+      margin-top: 0.5em;
+      color: #0066cc;
+      text-decoration: none;
+    }
+
+    .culture-item a:hover {
+      text-decoration: underline;
+    }
+
+    #map {
+      height: 500px;
+      width: 100%;
+      display: none;
+      margin: 1em auto;
+    }
+
+    @media (max-width: 768px) {
+      .culture-grid .culture-item {
+        width: 90%;
+      }
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        background: #fff;
+      }
+      .search-bar, .view-toggle {
+        display: none !important;
+      }
+      .culture-item {
+        box-shadow: none !important;
+        border: 1px solid #ccc;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🌍 Global Culture Master Directory</h1>
+
+  <div class="search-bar">
+    <input type="text" id="search" placeholder="Search by name, region, or language…" />
+  </div>
+
+  <div class="view-toggle">
+    <button onclick="setView('list')">📄 List View</button>
+    <button onclick="setView('grid')">🔳 Grid View</button>
+    <button onclick="sortBy('culture_name')">Sort by Name</button>
+    <button onclick="sortBy('region')">Sort by Region</button>
+    <button onclick="exportCSV()">Export CSV</button>
+    <button onclick="toggleLanguageView()">View All by Language</button>
+    <button onclick="toggleMapView()">🌍 Map View</button>
+  </div>
+
+  <div id="culture-container" class="culture-list active"></div>
+  <div id="language-container" style="display: none;"></div>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script>
+    let cultures = [];
+    let currentView = 'list';
+    let map;
+
+    async function loadManifest() {
+      const res = await fetch('manifest.json');
+      cultures = await res.json();
+      renderCultures(cultures);
+    }
+
+    function setView(view) {
+      currentView = view;
+      document.getElementById('culture-container').className =
+        (view === 'grid') ? 'culture-grid active' : 'culture-list active';
+      renderCultures(filterCultures(document.getElementById('search').value));
+    }
+
+    function renderCultures(filtered) {
+      const container = document.getElementById('culture-container');
+      container.innerHTML = filtered.map(c => `
+        <div class="culture-item">
+          <h2>${c.culture_name}</h2>
+          <p><strong>Region:</strong> ${c.region || '—'}</p>
+          <p><strong>Languages:</strong> ${Array.isArray(c.language_tags)
+            ? c.language_tags.map(tag => `<a href="#" onclick="filterByLanguage('${tag}')">${tag}</a>`).join(', ')
+            : '—'
+          }</p>
+          <a href="${c.html_path}">View Culture Card →</a>
+          ${c.missing_fields?.length
+            ? `<p style="color:red;"><em>⚠ Missing ${c.missing_fields.length} fields</em></p>`
+            : `<p style="color:green;"><em>✓ Complete</em></p>`}
+        </div>
+      `).join('');
+    }
+
+    function filterCultures(query) {
+      const q = query.toLowerCase();
+      return cultures.filter(c =>
+        c.culture_name.toLowerCase().includes(q) ||
+        c.region.toLowerCase().includes(q) ||
+        (Array.isArray(c.language_tags) && c.language_tags.some(tag => tag.toLowerCase().includes(q)))
+      );
+    }
+
+    function filterByLanguage(lang) {
+      document.getElementById('search').value = lang;
+      renderCultures(filterCultures(lang.toLowerCase()));
+    }
+
+    document.getElementById('search').addEventListener('input', e => {
+      renderCultures(filterCultures(e.target.value));
+    });
+
+    // ✅ Implement sortBy(field)
+    function sortBy(field) {
+      cultures.sort((a, b) => {
+        const valA = (a[field] || '').toString().toLowerCase();
+        const valB = (b[field] || '').toString().toLowerCase();
+        return valA.localeCompare(valB);
+      });
+      renderCultures(filterCultures(document.getElementById('search').value));
+    }
+
+    // ✅ Implement exportCSV()
+    function exportCSV() {
+      const rows = [
+        ['Culture Name', 'Region', 'Languages', 'Missing Fields', 'Last Updated']
+      ];
+      for (const c of filterCultures(document.getElementById('search').value)) {
+        rows.push([
+          `"${c.culture_name || ''}"`,
+          `"${c.region || ''}"`,
+          `"${(c.language_tags || []).join('; ')}"`,
+          `"${(c.missing_fields || []).join('; ')}"`,
+          `"${c.last_updated || ''}"`
+        ]);
+      }
+      const blob = new Blob([rows.map(r => r.join(',')).join('\n')], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'filtered_cultures.csv';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Toggle language view
+    function toggleLanguageView() {
+      const container = document.getElementById('language-container');
+      if (container.style.display === 'none') {
+        container.style.display = 'block';
+        renderLanguages();
+      } else {
+        container.style.display = 'none';
+      }
+    }
+
+    function renderLanguages() {
+      const container = document.getElementById('language-container');
+      const languages = {};
+
+      cultures.forEach(culture => {
+        (culture.language_tags || []).forEach(lang => {
+          if (!languages[lang]) {
+            languages[lang] = [];
+          }
+          languages[lang].push(culture);
+        });
+      });
+
+      container.innerHTML = Object.keys(languages).sort().map(lang => `
+        <h2>${lang}</h2>
+        <ul>
+          ${languages[lang].map(culture => `
+            <li>${culture.culture_name} (${culture.region})</li>
+          `).join('')}
+        </ul>
+      `).join('');
+    }
+
+    // Toggle map view
+    function toggleMapView() {
+      const mapContainer = document.getElementById('map');
+      if (mapContainer.style.display === 'none') {
+        mapContainer.style.display = 'block';
+        if (!map) {
+          initializeMap();
+        }
+      } else {
+        mapContainer.style.display = 'none';
+      }
+    }
+
+    function initializeMap() {
+      map = L.map('map').setView([20, 0], 2);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      cultures.forEach(culture => {
+        if (culture.region) {
+          const marker = L.marker(getRegionCoordinates(culture.region)).addTo(map);
+          marker.bindPopup(`<b>${culture.culture_name}</b><br>${culture.region}`);
+        }
+      });
+    }
+
+    function getRegionCoordinates(region) {
+      // This function should return the coordinates for the given region.
+      // For simplicity, we'll use a static mapping for a few regions.
+      const coordinates = {
+        'Mexico': [23.6345, -102.5528],
+        'Colombia': [4.5709, -74.2973],
+        'Spain': [40.4637, -3.7492]
+        // Add more regions as needed
+      };
+      return coordinates[region] || [0, 0];
+    }
+
+    loadManifest();
+  </script>
+</body>
+</html>

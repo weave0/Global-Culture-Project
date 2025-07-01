@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enrichment Report</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2em;
+      background: #f8f8f8;
+      color: #333;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.8em;
+      margin-bottom: 1.5em;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: auto;
+      font-size: 0.95em;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      vertical-align: top;
+    }
+
+    th {
+      background-color: #f2f2f2;
+      font-weight: bold;
+      text-align: left;
+    }
+
+    tr:nth-child(even) {
+      background-color: #fafafa;
+    }
+
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .suggested {
+      background-color: #e6f7ff;
+    }
+
+    .original {
+      color: #888;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>GPT Enrichment Suggestions Report</h1>
+
+  <div id="summary" style="text-align:center; margin-bottom: 1em;">
+    <strong>Total cultures enriched:</strong> <span id="count-cultures"></span> |
+    <strong>Most enriched field:</strong> <span id="top-field"></span>
+  </div>
+
+  <div style="margin-bottom: 1em;">
+    <label>Filter by Culture: <select id="filter-culture" onchange="filterTable()"><option value="">All</option></select></label>
+    <label>Field: <select id="filter-field" onchange="filterTable()"><option value="">All</option></select></label>
+    <label>Missing Original Only: <input type="checkbox" id="filter-missing" onclick="filterTable()"></label>
+  </div>
+
+  <div style="text-align: right; margin-bottom: 1em;">
+    <button onclick="downloadCSV()">Export CSV</button>
+    <button onclick="window.print()">Print PDF</button>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Culture Name</th>
+        <th scope="col">Field</th>
+        <th scope="col">Original Value</th>
+        <th scope="col">Suggested Value</th>
+      </tr>
+    </thead>
+    <tbody id="report-table-body">
+      {% for suggestion in suggestions %}
+      <tr data-culture="{{ suggestion.culture_name }}" data-field="{{ suggestion.field }}" data-original="{{ suggestion.original_value or '' }}">
+        <td>{{ suggestion.culture_name }}</td>
+        <td>{{ suggestion.field }}</td>
+        <td class="original"><pre>{{ suggestion.original_value or "—" }}</pre></td>
+        <td class="suggested"><pre>{{ suggestion.suggested_value }}</pre></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <script>
+    const suggestions = {{ suggestions | tojson }}; // Assuming suggestions are passed from Flask/Jinja2
+
+    // --- Summary Section ---
+    function updateSummary() {
+      const uniqueCultures = new Set(suggestions.map(s => s.culture_name));
+      document.getElementById('count-cultures').textContent = uniqueCultures.size;
+
+      const fieldCounts = {};
+      suggestions.forEach(s => {
+        fieldCounts[s.field] = (fieldCounts[s.field] || 0) + 1;
+      });
+
+      let mostFrequentField = '';
+      let maxCount = 0;
+      for (const field in fieldCounts) {
+        if (fieldCounts[field] > maxCount) {
+          maxCount = fieldCounts[field];
+          mostFrequentField = field;
+        }
+      }
+      document.getElementById('top-field').textContent = mostFrequentField || 'N/A';
+    }
+
+    // --- Export Buttons ---
+    function downloadCSV() {
+      const table = document.querySelector('table');
+      let csv = [];
+      for (let i = 0; i < table.rows.length; i++) {
+        let row = [], cols = table.rows[i].querySelectorAll('td, th');
+        for (let j = 0; j < cols.length; j++) {
+          let data = cols[j].innerText.replace(/\n/g, '\\n').replace(/"/g, '""'); // Escape newlines and double quotes
+          row.push('"' + data + '"');
+        }
+        csv.push(row.join(','));
+      }
+
+      const csvFile = new Blob([csv.join('\n')], { type: 'text/csv' });
+      const downloadLink = document.createElement('a');
+      downloadLink.download = 'enrichment_report.csv';
+      downloadLink.href = window.URL.createObjectURL(csvFile);
+      downloadLink.style.display = 'none';
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+    }
+
+    // --- Filters ---
+    function populateFilters() {
+      const cultureSelect = document.getElementById('filter-culture');
+      const fieldSelect = document.getElementById('filter-field');
+
+      const uniqueCultures = [...new Set(suggestions.map(s => s.culture_name))].sort();
+      uniqueCultures.forEach(culture => {
+        const option = document.createElement('option');
+        option.value = culture;
+        option.textContent = culture;
+        cultureSelect.appendChild(option);
+      });
+
+      const uniqueFields = [...new Set(suggestions.map(s => s.field))].sort();
+      uniqueFields.forEach(field => {
+        const option = document.createElement('option');
+        option.value = field;
+        option.textContent = field;
+        fieldSelect.appendChild(option);
+      });
+    }
+
+    function filterTable() {
+      const selectedCulture = document.getElementById('filter-culture').value;
+      const selectedField = document.getElementById('filter-field').value;
+      const missingOriginalOnly = document.getElementById('filter-missing').checked;
+      const tableBody = document.getElementById('report-table-body');
+      const rows = tableBody.getElementsByTagName('tr');
+
+      for (let i = 0; i < rows.length; i++) {
+        const row = rows[i];
+        const culture = row.getAttribute('data-culture');
+        const field = row.getAttribute('data-field');
+        const originalValue = row.getAttribute('data-original');
+
+        let showRow = true;
+
+        if (selectedCulture && culture !== selectedCulture) {
+          showRow = false;
+        }
+        if (selectedField && field !== selectedField) {
+          showRow = false;
+        }
+        if (missingOriginalOnly && originalValue !== '') {
+          showRow = false;
+        }
+
+        row.style.display = showRow ? '' : 'none';
+      }
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      updateSummary();
+      populateFilters();
+      filterTable(); // Apply initial filters (e.g., "All" selected)
+    });
+  </script>
+</body>
+
+</html>

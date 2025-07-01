@@ -1,0 +1,5 @@
+Arabic (All Dialects) | alt_names: Arabic
+Albanian (Gheg & Tosk) | alt_names: Albanian, Gheg, Tosk
+Chinese (All Dialects, Simplified & Traditional) | alt_names: Chinese, Simplified Chinese, Traditional Chinese
+Portuguese (Continental, Brazilian & African) | alt_names: Portuguese, Continental Portuguese, Brazilian Portuguese, African Portuguese
+Spanish (Castilian & Latin American) | alt_names: Spanish, Castilian Spanish, Latin American Spanish

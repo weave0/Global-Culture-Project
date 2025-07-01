@@ -1,0 +1,37 @@
+name: Generate Enrichment Report
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *' # Runs every day at midnight UTC
+
+jobs:
+  render-enrichment-report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Generate enrichment report
+        run: |
+          python generate_enrichment_report.py --verbose --force
+
+      - name: Upload report artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: enrichment-report
+          path: sharepoint_output/enrichment_report.html
